@@ -11,6 +11,7 @@ interface PlanInputProps {
   onChange: (value: string) => void
   onSubmit: () => void
   onLoadSample: () => void
+  onLoadNSGSample?: () => void
   onClear: () => void
   error: ParseError | null
   isLoading: boolean
@@ -21,6 +22,7 @@ export const PlanInput = memo(function PlanInput({
   onChange,
   onSubmit,
   onLoadSample,
+  onLoadNSGSample,
   onClear,
   error,
   isLoading,
@@ -60,8 +62,14 @@ export const PlanInput = memo(function PlanInput({
               </Button>
 
               <Button onClick={onLoadSample} variant="outline" disabled={isLoading}>
-                Load Sample Data
+                Load Sample
               </Button>
+
+              {onLoadNSGSample && (
+                <Button onClick={onLoadNSGSample} variant="outline" disabled={isLoading}>
+                  Load NSG Sample
+                </Button>
+              )}
             </div>
 
             <Button
