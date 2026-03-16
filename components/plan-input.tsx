@@ -43,24 +43,26 @@ export const PlanInput = memo(function PlanInput({
             disabled={isLoading}
           />
 
-          <div className="flex gap-3">
-            <Button onClick={onSubmit} disabled={!value.trim() || isLoading} className="flex items-center gap-2">
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Parsing...
-                </>
-              ) : (
-                <>
-                  <FileText className="w-4 h-4" />
-                  Parse Plan
-                </>
-              )}
-            </Button>
+          <div className="flex gap-3 justify-between items-center">
+            <div className="flex gap-3">
+              <Button onClick={onSubmit} disabled={!value.trim() || isLoading} className="flex items-center gap-2">
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Parsing...
+                  </>
+                ) : (
+                  <>
+                    <FileText className="w-4 h-4" />
+                    Parse Plan
+                  </>
+                )}
+              </Button>
 
-            <Button onClick={onLoadSample} variant="outline" disabled={isLoading}>
-              Load Sample Data
-            </Button>
+              <Button onClick={onLoadSample} variant="outline" disabled={isLoading}>
+                Load Sample Data
+              </Button>
+            </div>
 
             <Button
               onClick={onClear}
