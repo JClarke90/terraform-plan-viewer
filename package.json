@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "rm -rf .next && next dev",
     "build": "npm install --force && next build",
     "build:github": "npm install --force && next build && touch out/.nojekyll",
     "start": "npm run build:dev && npx serve@latest out",
