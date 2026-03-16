@@ -64,6 +64,12 @@ export default function TerraformPlanViewer() {
     setShowInput(true)
     setParseError(null)
     setPlanData(null)
+    setPlanInput("")
+  }, [])
+
+  const handleClear = useCallback(() => {
+    setPlanInput("")
+    setParseError(null)
   }, [])
 
   const changeSummary = useMemo(() => {
@@ -93,6 +99,7 @@ export default function TerraformPlanViewer() {
           onChange={setPlanInput}
           onSubmit={handlePlanSubmit}
           onLoadSample={loadSampleData}
+          onClear={handleClear}
           error={parseError}
           isLoading={isPending}
         />
