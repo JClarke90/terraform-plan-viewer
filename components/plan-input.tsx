@@ -3,7 +3,7 @@
 import { memo } from "react"
 import { Button } from "./ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
-import { Upload, FileText, Loader2 } from "lucide-react"
+import { Upload, FileText, Loader2, X } from "lucide-react"
 import type { ParseError } from "../types/terraform"
 
 interface PlanInputProps {
@@ -11,6 +11,7 @@ interface PlanInputProps {
   onChange: (value: string) => void
   onSubmit: () => void
   onLoadSample: () => void
+  onClear: () => void
   error: ParseError | null
   isLoading: boolean
 }
@@ -20,6 +21,7 @@ export const PlanInput = memo(function PlanInput({
   onChange,
   onSubmit,
   onLoadSample,
+  onClear,
   error,
   isLoading,
 }: PlanInputProps) {
@@ -58,6 +60,16 @@ export const PlanInput = memo(function PlanInput({
 
             <Button onClick={onLoadSample} variant="outline" disabled={isLoading}>
               Load Sample Data
+            </Button>
+
+            <Button
+              onClick={onClear}
+              variant="outline"
+              disabled={!value.trim() || isLoading}
+              className="flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              Clear
             </Button>
           </div>
 
