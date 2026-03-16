@@ -73,9 +73,14 @@ jobs:
       run: pnpm install
       
     - name: Run Snyk to check for vulnerabilities
+      if: secrets.SNYK_TOKEN != ''
       uses: snyk/actions/node@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
         args: --severity-threshold=high
       continue-on-error: true
+      
+    - name: Snyk not configured
+      if: secrets.SNYK_TOKEN == ''
+      run: echo "⚠️  Snyk token not configured. Set SNYK_TOKEN in GitHub Secrets to enable advanced vulnerability scanning."
