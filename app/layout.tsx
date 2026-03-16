@@ -1,5 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
+import { Geist, Geist_Mono } from "geist/font"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -18,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${Geist.variable} ${Geist_Mono.variable}`}>
       <body className="font-sans antialiased">
         {children}
       </body>
