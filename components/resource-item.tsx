@@ -25,9 +25,9 @@ export const ResourceItem = memo(function ResourceItem({ resource, isExpanded, o
         className="w-full px-4 py-3 flex items-center gap-2 text-left hover:bg-white/50 transition-colors"
       >
         {isExpanded ? (
-          <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />
         ) : (
-          <ChevronRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
+          <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
         )}
         {getActionIcon(resource.action)}
         <div className="flex-1 min-w-0">

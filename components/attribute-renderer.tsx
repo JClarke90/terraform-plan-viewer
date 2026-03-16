@@ -301,22 +301,22 @@ export const AttributeRenderer = memo(function AttributeRenderer({
   const getActionIcon = (action: string) => {
     switch (action) {
       case "+":
-        return <Plus className="w-4 h-4 text-green-600 flex-shrink-0" />
+        return <Plus className="w-4 h-4 text-green-600 shrink-0" />
       case "-":
-        return <Minus className="w-4 h-4 flex-shrink-0" style={{ color: "rgb(230, 10, 10)" }} />
+        return <Minus className="w-4 h-4 shrink-0" style={{ color: "rgb(230, 10, 10)" }} />
       case "~":
-        return <TildeIcon className="w-4 h-4 flex-shrink-0" style={{ color: "rgb(51, 172, 234)" }} />
+        return <TildeIcon className="w-4 h-4 shrink-0" style={{ color: "rgb(51, 172, 234)" }} />
       case "-/+":
-        return <Repeat className="w-4 h-4 flex-shrink-0" style={{ color: "rgb(240, 140, 88)" }} />
+        return <Repeat className="w-4 h-4 shrink-0" style={{ color: "rgb(240, 140, 88)" }} />
       default:
         // Handle resource-level actions when no attribute-level action exists
         if (resourceAction === "replace")
-          return <Repeat className="w-4 h-4 flex-shrink-0" style={{ color: "rgb(240, 140, 88)" }} />
+          return <Repeat className="w-4 h-4 shrink-0" style={{ color: "rgb(240, 140, 88)" }} />
         if (resourceAction === "update")
-          return <TildeIcon className="w-4 h-4 flex-shrink-0" style={{ color: "rgb(51, 172, 234)" }} />
-        if (resourceAction === "create") return <Plus className="w-4 h-4 text-green-600 flex-shrink-0" />
+          return <TildeIcon className="w-4 h-4 shrink-0" style={{ color: "rgb(51, 172, 234)" }} />
+        if (resourceAction === "create") return <Plus className="w-4 h-4 text-green-600 shrink-0" />
         if (resourceAction === "delete")
-          return <Minus className="w-4 h-4 flex-shrink-0" style={{ color: "rgb(230, 10, 10)" }} />
+          return <Minus className="w-4 h-4 shrink-0" style={{ color: "rgb(230, 10, 10)" }} />
         return null
     }
   }

@@ -4,13 +4,13 @@ import { TildeIcon } from "../components/icons/tilde-icon"
 export function getActionIcon(action: string) {
   switch (action) {
     case "create":
-      return <Plus className="w-5 h-5 text-green-600 flex-shrink-0" />
+      return <Plus className="w-5 h-5 text-green-600 shrink-0" />
     case "delete":
-      return <Minus className="w-5 h-5 flex-shrink-0" style={{ color: "rgb(230, 10, 10)" }} />
+      return <Minus className="w-5 h-5 shrink-0" style={{ color: "rgb(230, 10, 10)" }} />
     case "update":
-      return <TildeIcon className="w-5 h-5 flex-shrink-0" style={{ color: "rgb(51, 172, 234)" }} />
+      return <TildeIcon className="w-5 h-5 shrink-0" style={{ color: "rgb(51, 172, 234)" }} />
     case "replace":
-      return <Repeat className="w-5 h-5 flex-shrink-0" style={{ color: "rgb(240, 140, 88)" }} />
+      return <Repeat className="w-5 h-5 shrink-0" style={{ color: "rgb(240, 140, 88)" }} />
     default:
       return null
   }
