@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "rm -rf .next node_modules/.cache && next dev",
+    "dev": "rm -rf .next node_modules && npm install --legacy-peer-deps && next dev",
     "build": "next build",
     "build:github": "next build && touch out/.nojekyll",
     "start": "npm run build:dev && npx serve@latest out",
