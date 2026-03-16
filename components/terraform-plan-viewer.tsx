@@ -46,18 +46,7 @@ export default function TerraformPlanViewer() {
 
   const loadSampleData = useCallback(() => {
     setPlanInput(SAMPLE_PLAN)
-    startTransition(() => {
-      try {
-        const result = parseTerraformPlan(SAMPLE_PLAN)
-        setPlanData(result)
-        setShowInput(false)
-      } catch (error) {
-        setParseError({
-          message: "Failed to parse sample data",
-          details: error instanceof Error ? error.message : "Unknown error occurred",
-        })
-      }
-    })
+    setParseError(null)
   }, [])
 
   const handleNewPlan = useCallback(() => {
