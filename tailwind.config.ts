@@ -20,8 +20,25 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)"],
-        mono: ["var(--font-geist-mono)"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          "Arial",
+          '"Noto Sans"',
+          "sans-serif",
+        ],
+        mono: [
+          '"SF Mono"',
+          "Monaco",
+          '"Cascadia Code"',
+          '"Roboto Mono"',
+          "Consolas",
+          '"Courier New"',
+          "monospace",
+        ],
       },
       colors: {
         border: "hsl(var(--border))",
