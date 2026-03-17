@@ -60,7 +60,7 @@ export const PlanInput = memo(function PlanInput({
               </Button>
 
               <Button onClick={onLoadSample} variant="outline" disabled={isLoading}>
-                Load Sample Data
+                Load Sample
               </Button>
             </div>
 

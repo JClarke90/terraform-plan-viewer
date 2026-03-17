@@ -1,4 +1,4 @@
-import type { TerraformPlan, TerraformResource, TerraformAttribute, TerraformBlock } from "../types/terraform"
+import type { TerraformPlan, TerraformResource, TerraformAttribute, TerraformBlock, ParsedRuleObject } from "../types/terraform"
 
 function cleanPlanText(planText: string): string {
   return planText
@@ -143,6 +143,7 @@ export function parseTerraformPlan(planText: string): TerraformPlan {
   let arrayItems: any[] = []
   let arrayChangeSymbol = ""
   let nestedArrayDepth = 0
+  let objectBuffer: { lines: string[]; action: string; braceDepth: number } | undefined = undefined
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]
@@ -162,11 +163,13 @@ export function parseTerraformPlan(planText: string): TerraformPlan {
         currentBlock,
         currentResource,
         nestedArrayDepth,
+        objectBuffer,
       )
 
       if (arrayResult.shouldContinue) {
         arrayItems = arrayResult.arrayItems
         nestedArrayDepth = arrayResult.nestedArrayDepth
+        objectBuffer = arrayResult.objectBuffer
         continue
       } else {
         parsingArray = false
@@ -174,6 +177,7 @@ export function parseTerraformPlan(planText: string): TerraformPlan {
         arrayItems = []
         arrayChangeSymbol = ""
         nestedArrayDepth = 0
+        objectBuffer = undefined
         continue
       }
     }
@@ -303,7 +307,11 @@ function handleArrayParsing(
   currentBlock: TerraformBlock | null,
   currentResource: TerraformResource | null,
   nestedArrayDepth: number,
+  objectBuffer?: { lines: string[]; action: string; braceDepth: number },
 ) {
+  // Initialize object buffer if not provided
+  const objBuffer = objectBuffer || { lines: [], action: "", braceDepth: 0 }
+
   // Count opening and closing brackets/braces
   const openBrackets = (line.match(/\[/g) || []).length
   const closeBrackets = (line.match(/\]/g) || []).length
@@ -311,6 +319,54 @@ function handleArrayParsing(
   const closeBraces = (line.match(/\}/g) || []).length
 
   const newNestedDepth = nestedArrayDepth + openBrackets + openBraces - closeBrackets - closeBraces
+
+  // Check if this is a security_rule or route array (NSG/Route Table specific)
+  const isSecurityRuleArray = arrayKey === "security_rule" || arrayKey === "route"
+
+  // Handle object start within array (for NSG security_rule objects)
+  if (isSecurityRuleArray && trimmedLine.match(/^\s*([+~-])\s*\{$/)) {
+    const actionMatch = trimmedLine.match(/^\s*([+~-])\s*\{$/)
+    objBuffer.action = actionMatch ? actionMatch[1] : ""
+    objBuffer.lines = []
+    objBuffer.braceDepth = 1
+    return {
+      shouldContinue: true,
+      arrayItems,
+      nestedArrayDepth: newNestedDepth,
+      objectBuffer: objBuffer,
+    }
+  }
+
+  // If we're inside an object buffer (collecting NSG rule properties)
+  if (isSecurityRuleArray && objBuffer.braceDepth > 0) {
+    // Track brace depth
+    objBuffer.braceDepth += openBraces - closeBraces
+
+    // Check for object end
+    if (trimmedLine === "}," || trimmedLine === "}") {
+      // Parse the collected object
+      const parsedRule = parseSecurityRuleObject(objBuffer.lines, objBuffer.action)
+      arrayItems.push(parsedRule)
+      objBuffer.lines = []
+      objBuffer.action = ""
+      objBuffer.braceDepth = 0
+      return {
+        shouldContinue: true,
+        arrayItems,
+        nestedArrayDepth: newNestedDepth,
+        objectBuffer: objBuffer,
+      }
+    }
+
+    // Collect line into buffer
+    objBuffer.lines.push(line)
+    return {
+      shouldContinue: true,
+      arrayItems,
+      nestedArrayDepth: newNestedDepth,
+      objectBuffer: objBuffer,
+    }
+  }
 
   // Check for array closing
   if (
@@ -342,10 +398,11 @@ function handleArrayParsing(
       shouldContinue: false,
       arrayItems,
       nestedArrayDepth: 0,
+      objectBuffer: undefined,
     }
   }
 
-  // Handle array items
+  // Handle array items (for non-NSG arrays or simple values)
   if (trimmedLine && !trimmedLine.startsWith("]") && !trimmedLine.endsWith("}")) {
     const changeMatch = line.match(/^\s*([+~-]?)\s*(.*)$/)
     if (changeMatch) {
@@ -361,7 +418,7 @@ function handleArrayParsing(
         cleanContent = cleanContent.slice(0, -1).trim()
       }
 
-      if (cleanContent && cleanContent !== "]" && cleanContent !== "}") {
+      if (cleanContent && cleanContent !== "]" && cleanContent !== "}" && cleanContent !== "{") {
         const itemWithSymbol = changeSymbol ? `${changeSymbol} ${cleanContent}` : cleanContent
         arrayItems.push(itemWithSymbol)
       }
@@ -372,7 +429,97 @@ function handleArrayParsing(
     shouldContinue: true,
     arrayItems,
     nestedArrayDepth: newNestedDepth,
+    objectBuffer: objBuffer,
   }
+}
+
+// Parse a security rule object from collected lines
+function parseSecurityRuleObject(lines: string[], action: string): ParsedRuleObject {
+  const rule: ParsedRuleObject = {
+    action,
+    name: "",
+    priority: null,
+    direction: "",
+    attributes: {},
+  }
+
+  let currentArrayKey: string | null = null
+  let currentArrayItems: string[] = []
+
+  for (const line of lines) {
+    const trimmedLine = line.trim()
+
+    // Skip comments and unchanged attribute hints
+    if (trimmedLine.startsWith("#") || trimmedLine.includes("unchanged attributes hidden")) {
+      continue
+    }
+
+    // Check for array end
+    if (currentArrayKey && trimmedLine === "]") {
+      rule.attributes[currentArrayKey] = currentArrayItems
+      currentArrayKey = null
+      currentArrayItems = []
+      continue
+    }
+
+    // If we're collecting array items
+    if (currentArrayKey) {
+      // Parse array item (strip change symbol and quotes)
+      const itemMatch = trimmedLine.match(/^\s*[+~-]?\s*"?([^",]*)"?,?$/)
+      if (itemMatch && itemMatch[1]) {
+        currentArrayItems.push(itemMatch[1])
+      }
+      continue
+    }
+
+    // Check for array start
+    const arrayStartMatch = trimmedLine.match(/^\s*[+~-]?\s*([a-z_]+)\s*=\s*\[\s*$/)
+    if (arrayStartMatch) {
+      currentArrayKey = arrayStartMatch[1]
+      currentArrayItems = []
+      continue
+    }
+
+    // Parse attribute line
+    const attrMatch = trimmedLine.match(/^\s*[+~-]?\s*([a-z_]+)\s*=\s*(.+)$/)
+    if (attrMatch) {
+      const [, key, rawValue] = attrMatch
+      let value: any = rawValue.trim()
+
+      // Clean up the value
+      if (value.endsWith(",")) {
+        value = value.slice(0, -1).trim()
+      }
+
+      // Parse different value types
+      if (value === "null" || value === '""') {
+        value = null
+      } else if (value === "true") {
+        value = true
+      } else if (value === "false") {
+        value = false
+      } else if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.slice(1, -1)
+      } else if (value === "[]") {
+        value = []
+      } else if (!isNaN(Number(value)) && value !== "") {
+        value = Number(value)
+      }
+
+      // Store in appropriate place
+      if (key === "name") {
+        rule.name = String(value || "")
+      } else if (key === "priority") {
+        rule.priority = typeof value === "number" ? value : null
+      } else if (key === "direction") {
+        rule.direction = String(value || "")
+      }
+
+      rule.attributes[key] = value
+    }
+  }
+
+  return rule
 }
 
 function parseAttribute(line: string): TerraformAttribute | null {
@@ -432,4 +579,109 @@ function parseValue(cleanValue: string): any {
   }
 
   return cleanValue
+}
+
+// Helper to process security_rule arrays after parsing to identify actual changes
+// by comparing removed (-) rules with added (+) rules based on name/priority
+export function processSecurityRuleChanges(securityRules: ParsedRuleObject[]): {
+  added: ParsedRuleObject[]
+  removed: ParsedRuleObject[]
+  modified: { old: ParsedRuleObject; new: ParsedRuleObject; changes: string[] }[]
+  unchanged: ParsedRuleObject[]
+} {
+  const addedRules = securityRules.filter((r) => r.action === "+")
+  const removedRules = securityRules.filter((r) => r.action === "-")
+
+  const modified: { old: ParsedRuleObject; new: ParsedRuleObject; changes: string[] }[] = []
+  const actuallyAdded: ParsedRuleObject[] = []
+  const actuallyRemoved: ParsedRuleObject[] = []
+  const unchanged: ParsedRuleObject[] = securityRules.filter((r) => r.action !== "+" && r.action !== "-")
+
+  // Match by name first, then by priority if no name match
+  const matchedRemovedIndices = new Set<number>()
+
+  for (const addedRule of addedRules) {
+    let matchIndex = -1
+    let matchedRemoved: ParsedRuleObject | null = null
+
+    // First try to match by name
+    if (addedRule.name) {
+      matchIndex = removedRules.findIndex(
+        (r, idx) => !matchedRemovedIndices.has(idx) && r.name === addedRule.name
+      )
+      if (matchIndex !== -1) {
+        matchedRemoved = removedRules[matchIndex]
+      }
+    }
+
+    // If no name match, try matching by priority and direction
+    if (!matchedRemoved && addedRule.priority !== null) {
+      matchIndex = removedRules.findIndex(
+        (r, idx) =>
+          !matchedRemovedIndices.has(idx) &&
+          r.priority === addedRule.priority &&
+          r.direction === addedRule.direction
+      )
+      if (matchIndex !== -1) {
+        matchedRemoved = removedRules[matchIndex]
+      }
+    }
+
+    if (matchedRemoved && matchIndex !== -1) {
+      matchedRemovedIndices.add(matchIndex)
+
+      // Find what changed between the two rules
+      const changes = findRuleChanges(matchedRemoved, addedRule)
+      if (changes.length > 0) {
+        modified.push({ old: matchedRemoved, new: addedRule, changes })
+      } else {
+        // No actual changes, just re-ordering or formatting differences
+        unchanged.push(addedRule)
+      }
+    } else {
+      // Truly new rule
+      actuallyAdded.push(addedRule)
+    }
+  }
+
+  // Remaining removed rules that weren't matched
+  removedRules.forEach((rule, idx) => {
+    if (!matchedRemovedIndices.has(idx)) {
+      actuallyRemoved.push(rule)
+    }
+  })
+
+  return { added: actuallyAdded, removed: actuallyRemoved, modified, unchanged }
+}
+
+// Compare two rules and return list of changed attributes
+function findRuleChanges(oldRule: ParsedRuleObject, newRule: ParsedRuleObject): string[] {
+  const changes: string[] = []
+  const allKeys = new Set([...Object.keys(oldRule.attributes), ...Object.keys(newRule.attributes)])
+
+  for (const key of allKeys) {
+    const oldVal = oldRule.attributes[key]
+    const newVal = newRule.attributes[key]
+
+    // Skip empty arrays - they're often just formatting differences
+    if (Array.isArray(oldVal) && oldVal.length === 0 && Array.isArray(newVal) && newVal.length === 0) {
+      continue
+    }
+    if ((oldVal === null || oldVal === "") && (newVal === null || newVal === "")) {
+      continue
+    }
+
+    // Compare arrays
+    if (Array.isArray(oldVal) && Array.isArray(newVal)) {
+      const oldSorted = [...oldVal].sort().join(",")
+      const newSorted = [...newVal].sort().join(",")
+      if (oldSorted !== newSorted) {
+        changes.push(key)
+      }
+    } else if (JSON.stringify(oldVal) !== JSON.stringify(newVal)) {
+      changes.push(key)
+    }
+  }
+
+  return changes
 }

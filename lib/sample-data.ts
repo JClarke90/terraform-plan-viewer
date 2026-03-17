@@ -38,4 +38,147 @@ Terraform will perform the following actions:
         location         = "West Europe"
     }
 
-Plan: 1 to add, 1 to change, 1 to destroy, 1 to replace.`
+  # azurerm_network_security_group.webapp-nsg will be updated in-place
+  ~ resource "azurerm_network_security_group" "webapp-nsg" {
+        id                  = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/networkSecurityGroups/webapp-nsg"
+        name                = "webapp-nsg"
+      ~ security_rule       = [
+          - {
+              - access                                     = "Allow"
+              - destination_address_prefix                 = "*"
+              - destination_address_prefixes               = []
+              - destination_application_security_group_ids = []
+              - destination_port_range                     = "3389"
+              - destination_port_ranges                    = []
+              - direction                                  = "Inbound"
+              - name                                       = "Allow-RDP-Inbound"
+              - priority                                   = 100
+              - protocol                                   = "Tcp"
+              - source_address_prefix                      = "VirtualNetwork"
+              - source_address_prefixes                    = []
+              - source_application_security_group_ids      = []
+              - source_port_range                          = "*"
+              - source_port_ranges                         = []
+            },
+          - {
+              - access                                     = "Allow"
+              - destination_address_prefixes               = [
+                  - "10.50.1.100",
+                ]
+              - destination_application_security_group_ids = []
+              - destination_port_ranges                    = [
+                  - "1645",
+                  - "1646",
+                  - "1812",
+                  - "1813",
+                ]
+              - direction                                  = "Inbound"
+              - name                                       = "Allow-Auth-Servers"
+              - priority                                   = 110
+              - protocol                                   = "*"
+              - source_address_prefixes                    = [
+                  - "10.20.0.0/16",
+                  - "10.30.0.0/16",
+                ]
+              - source_application_security_group_ids      = []
+              - source_port_range                          = "*"
+              - source_port_ranges                         = []
+            },
+          - {
+              - access                                     = "Deny"
+              - destination_address_prefix                 = "*"
+              - destination_address_prefixes               = []
+              - destination_application_security_group_ids = []
+              - destination_port_range                     = "*"
+              - destination_port_ranges                    = []
+              - direction                                  = "Inbound"
+              - name                                       = "Deny-All-Inbound"
+              - priority                                   = 4096
+              - protocol                                   = "*"
+              - source_address_prefix                      = "*"
+              - source_address_prefixes                    = []
+              - source_application_security_group_ids      = []
+              - source_port_range                          = "*"
+              - source_port_ranges                         = []
+            },
+          + {
+              + access                                     = "Allow"
+              + destination_address_prefix                 = "*"
+              + destination_address_prefixes               = []
+              + destination_application_security_group_ids = []
+              + destination_port_range                     = "3389"
+              + destination_port_ranges                    = []
+              + direction                                  = "Inbound"
+              + name                                       = "Allow-RDP-Inbound"
+              + priority                                   = 100
+              + protocol                                   = "Tcp"
+              + source_address_prefix                      = "VirtualNetwork"
+              + source_address_prefixes                    = []
+              + source_application_security_group_ids      = []
+              + source_port_range                          = "*"
+              + source_port_ranges                         = []
+            },
+          + {
+              + access                                     = "Allow"
+              + destination_address_prefixes               = [
+                  + "10.50.1.100",
+                ]
+              + destination_application_security_group_ids = []
+              + destination_port_ranges                    = [
+                  + "1645",
+                  + "1646",
+                  + "1812",
+                  + "1813",
+                ]
+              + direction                                  = "Inbound"
+              + name                                       = "Allow-Auth-Servers"
+              + priority                                   = 110
+              + protocol                                   = "*"
+              + source_address_prefixes                    = [
+                  + "10.20.0.0/16",
+                  + "10.30.0.0/16",
+                  + "10.40.0.0/16",
+                ]
+              + source_application_security_group_ids      = []
+              + source_port_range                          = "*"
+              + source_port_ranges                         = []
+            },
+          + {
+              + access                                     = "Allow"
+              + destination_address_prefix                 = "*"
+              + destination_address_prefixes               = []
+              + destination_application_security_group_ids = []
+              + destination_port_range                     = "22"
+              + destination_port_ranges                    = []
+              + direction                                  = "Inbound"
+              + name                                       = "Allow-SSH-Inbound"
+              + priority                                   = 105
+              + protocol                                   = "Tcp"
+              + source_address_prefix                      = "10.0.0.0/8"
+              + source_address_prefixes                    = []
+              + source_application_security_group_ids      = []
+              + source_port_range                          = "*"
+              + source_port_ranges                         = []
+            },
+          + {
+              + access                                     = "Deny"
+              + destination_address_prefix                 = "*"
+              + destination_address_prefixes               = []
+              + destination_application_security_group_ids = []
+              + destination_port_range                     = "*"
+              + destination_port_ranges                    = []
+              + direction                                  = "Inbound"
+              + name                                       = "Deny-All-Inbound"
+              + priority                                   = 4096
+              + protocol                                   = "*"
+              + source_address_prefix                      = "*"
+              + source_address_prefixes                    = []
+              + source_application_security_group_ids      = []
+              + source_port_range                          = "*"
+              + source_port_ranges                         = []
+            },
+        ]
+        tags                = {}
+    }
+
+Plan: 1 to add, 2 to change, 1 to destroy, 1 to replace.`

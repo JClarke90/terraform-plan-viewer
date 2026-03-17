@@ -46,3 +46,20 @@ export interface ParseError {
   message: string
   details?: string
 }
+
+// Parsed NSG/Route security rule object
+export interface ParsedRuleObject {
+  action: string
+  name: string
+  priority: number | null
+  direction: string
+  attributes: Record<string, any>
+}
+
+// Result of NSG security rule comparison
+export interface SecurityRuleChanges {
+  added: ParsedRuleObject[]
+  removed: ParsedRuleObject[]
+  modified: { old: ParsedRuleObject; new: ParsedRuleObject; changes: string[] }[]
+  unchanged: ParsedRuleObject[]
+}
