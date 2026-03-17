@@ -45,10 +45,10 @@ export const SAMPLE_NSG_PLAN = `Terraform used the selected providers to generat
 
 Terraform will perform the following actions:
 
-  # azurerm_network_security_group.VNET-PROD-NSG will be updated in-place
-  ~ resource "azurerm_network_security_group" "VNET-PROD-NSG" {
-        id                  = "/subscriptions/1234-5678/resourceGroups/VNET-RG/providers/Microsoft.Network/networkSecurityGroups/VNET-PROD-NSG"
-        name                = "VNET-PROD-NSG"
+  # azurerm_network_security_group.webapp-nsg will be updated in-place
+  ~ resource "azurerm_network_security_group" "webapp-nsg" {
+        id                  = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/networkSecurityGroups/webapp-nsg"
+        name                = "webapp-nsg"
       ~ security_rule       = [
           - {
               - access                                     = "Allow"
@@ -58,7 +58,7 @@ Terraform will perform the following actions:
               - destination_port_range                     = "3389"
               - destination_port_ranges                    = []
               - direction                                  = "Inbound"
-              - name                                       = "RDP-VNET-NSG-RULE"
+              - name                                       = "Allow-RDP-Inbound"
               - priority                                   = 100
               - protocol                                   = "Tcp"
               - source_address_prefix                      = "VirtualNetwork"
@@ -70,7 +70,7 @@ Terraform will perform the following actions:
           - {
               - access                                     = "Allow"
               - destination_address_prefixes               = [
-                  - "10.11.0.70",
+                  - "10.50.1.100",
                 ]
               - destination_application_security_group_ids = []
               - destination_port_ranges                    = [
@@ -80,13 +80,12 @@ Terraform will perform the following actions:
                   - "1813",
                 ]
               - direction                                  = "Inbound"
-              - name                                       = "RADIUS-NSG-RULE"
-              - priority                                   = 111
+              - name                                       = "Allow-Auth-Servers"
+              - priority                                   = 110
               - protocol                                   = "*"
               - source_address_prefixes                    = [
-                  - "10.130.8.0/23",
-                  - "172.16.0.0/16",
-                  - "192.168.0.0/16",
+                  - "10.20.0.0/16",
+                  - "10.30.0.0/16",
                 ]
               - source_application_security_group_ids      = []
               - source_port_range                          = "*"
@@ -100,7 +99,7 @@ Terraform will perform the following actions:
               - destination_port_range                     = "*"
               - destination_port_ranges                    = []
               - direction                                  = "Inbound"
-              - name                                       = "DenyAllIn-NSG-RULE"
+              - name                                       = "Deny-All-Inbound"
               - priority                                   = 4096
               - protocol                                   = "*"
               - source_address_prefix                      = "*"
@@ -117,7 +116,7 @@ Terraform will perform the following actions:
               + destination_port_range                     = "3389"
               + destination_port_ranges                    = []
               + direction                                  = "Inbound"
-              + name                                       = "RDP-VNET-NSG-RULE"
+              + name                                       = "Allow-RDP-Inbound"
               + priority                                   = 100
               + protocol                                   = "Tcp"
               + source_address_prefix                      = "VirtualNetwork"
@@ -129,7 +128,7 @@ Terraform will perform the following actions:
           + {
               + access                                     = "Allow"
               + destination_address_prefixes               = [
-                  + "10.11.0.70",
+                  + "10.50.1.100",
                 ]
               + destination_application_security_group_ids = []
               + destination_port_ranges                    = [
@@ -139,14 +138,13 @@ Terraform will perform the following actions:
                   + "1813",
                 ]
               + direction                                  = "Inbound"
-              + name                                       = "RADIUS-NSG-RULE"
-              + priority                                   = 111
+              + name                                       = "Allow-Auth-Servers"
+              + priority                                   = 110
               + protocol                                   = "*"
               + source_address_prefixes                    = [
-                  + "10.130.8.0/23",
-                  + "10.131.8.0/23",
-                  + "172.16.0.0/16",
-                  + "192.168.0.0/16",
+                  + "10.20.0.0/16",
+                  + "10.30.0.0/16",
+                  + "10.40.0.0/16",
                 ]
               + source_application_security_group_ids      = []
               + source_port_range                          = "*"
@@ -160,7 +158,7 @@ Terraform will perform the following actions:
               + destination_port_range                     = "22"
               + destination_port_ranges                    = []
               + direction                                  = "Inbound"
-              + name                                       = "SSH-NEW-NSG-RULE"
+              + name                                       = "Allow-SSH-Inbound"
               + priority                                   = 105
               + protocol                                   = "Tcp"
               + source_address_prefix                      = "10.0.0.0/8"
@@ -177,7 +175,7 @@ Terraform will perform the following actions:
               + destination_port_range                     = "*"
               + destination_port_ranges                    = []
               + direction                                  = "Inbound"
-              + name                                       = "DenyAllIn-NSG-RULE"
+              + name                                       = "Deny-All-Inbound"
               + priority                                   = 4096
               + protocol                                   = "*"
               + source_address_prefix                      = "*"
