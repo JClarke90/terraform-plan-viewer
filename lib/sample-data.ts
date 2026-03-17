@@ -38,13 +38,6 @@ Terraform will perform the following actions:
         location         = "West Europe"
     }
 
-Plan: 1 to add, 1 to change, 1 to destroy, 1 to replace.`
-
-export const SAMPLE_NSG_PLAN = `Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
-  ~ update in-place
-
-Terraform will perform the following actions:
-
   # azurerm_network_security_group.webapp-nsg will be updated in-place
   ~ resource "azurerm_network_security_group" "webapp-nsg" {
         id                  = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.Network/networkSecurityGroups/webapp-nsg"
@@ -188,4 +181,4 @@ Terraform will perform the following actions:
         tags                = {}
     }
 
-Plan: 0 to add, 1 to change, 0 to destroy.`
+Plan: 1 to add, 2 to change, 1 to destroy, 1 to replace.`

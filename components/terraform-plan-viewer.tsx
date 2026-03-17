@@ -6,7 +6,7 @@ import { PlanInput } from "./plan-input"
 import { PlanSummary } from "./plan-summary"
 import { ResourceList } from "./resource-list"
 import { parseTerraformPlan } from "../lib/terraform-parser"
-import { SAMPLE_PLAN, SAMPLE_NSG_PLAN } from "../lib/sample-data"
+import { SAMPLE_PLAN } from "../lib/sample-data"
 import type { TerraformPlan, ParseError } from "../types/terraform"
 
 export default function TerraformPlanViewer() {
@@ -49,11 +49,6 @@ export default function TerraformPlanViewer() {
     setParseError(null)
   }, [])
 
-  const loadNSGSampleData = useCallback(() => {
-    setPlanInput(SAMPLE_NSG_PLAN)
-    setParseError(null)
-  }, [])
-
   const handleNewPlan = useCallback(() => {
     setShowInput(true)
     setParseError(null)
@@ -93,7 +88,6 @@ export default function TerraformPlanViewer() {
           onChange={setPlanInput}
           onSubmit={handlePlanSubmit}
           onLoadSample={loadSampleData}
-          onLoadNSGSample={loadNSGSampleData}
           onClear={handleClear}
           error={parseError}
           isLoading={isPending}
