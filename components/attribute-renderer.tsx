@@ -330,18 +330,7 @@ function ModifiedRuleCard({
             return (
               <div key={key} className="py-1.5 border-b last:border-b-0 border-gray-100">
                 <div className="text-xs font-medium text-gray-700 mb-1">{key}</div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-xs text-gray-500 mb-0.5">Before:</div>
-                    <div className="text-xs font-mono" style={{ color: "rgb(230, 10, 10)" }}>
-                      {formatValue(oldVal)}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-gray-500 mb-0.5">After:</div>
-                    <div className="text-xs font-mono text-green-600">{formatValue(newVal)}</div>
-                  </div>
-                </div>
+                <ValueDiff oldVal={oldVal} newVal={newVal} />
               </div>
             )
           })}
@@ -359,6 +348,97 @@ function formatValue(value: any): string {
     return value.join(", ")
   }
   return String(value)
+}
+
+// Normalize any value into an array of string tokens for diffing
+function toTokens(value: any): string[] {
+  if (value === null || value === undefined || value === "") return []
+  if (Array.isArray(value)) return value.map((v) => String(v))
+  return [String(value)]
+}
+
+// Component that highlights the actual differences between before/after values
+function ValueDiff({ oldVal, newVal }: { oldVal: any; newVal: any }) {
+  const oldTokens = toTokens(oldVal)
+  const newTokens = toTokens(newVal)
+
+  const oldSet = new Set(oldTokens)
+  const newSet = new Set(newTokens)
+
+  // Items only in the old value were removed; items only in the new value were added
+  const removed = oldTokens.filter((t) => !newSet.has(t))
+  const added = newTokens.filter((t) => !oldSet.has(t))
+
+  return (
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <div className="text-xs text-gray-500 mb-0.5">Before:</div>
+          <div className="flex flex-wrap gap-1">
+            {oldTokens.length === 0 ? (
+              <span className="text-xs font-mono text-gray-400 italic">empty</span>
+            ) : (
+              oldTokens.map((token, i) => {
+                const isRemoved = !newSet.has(token)
+                return (
+                  <span
+                    key={i}
+                    className={`text-xs font-mono px-1.5 py-0.5 rounded ${
+                      isRemoved ? "bg-red-100 font-semibold" : "bg-gray-100"
+                    }`}
+                    style={isRemoved ? { color: "rgb(230, 10, 10)" } : { color: "#4b5563" }}
+                  >
+                    {token}
+                  </span>
+                )
+              })
+            )}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs text-gray-500 mb-0.5">After:</div>
+          <div className="flex flex-wrap gap-1">
+            {newTokens.length === 0 ? (
+              <span className="text-xs font-mono text-gray-400 italic">empty</span>
+            ) : (
+              newTokens.map((token, i) => {
+                const isAdded = !oldSet.has(token)
+                return (
+                  <span
+                    key={i}
+                    className={`text-xs font-mono px-1.5 py-0.5 rounded ${
+                      isAdded ? "bg-green-100 text-green-700 font-semibold" : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {token}
+                  </span>
+                )
+              })
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Explicit difference callout */}
+      {(added.length > 0 || removed.length > 0) && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 text-xs">
+          <span className="text-gray-500 font-medium">Difference:</span>
+          {added.map((token, i) => (
+            <span key={`a-${i}`} className="flex items-center gap-0.5 text-green-700 font-mono">
+              <Plus className="w-3 h-3" />
+              {token}
+            </span>
+          ))}
+          {removed.map((token, i) => (
+            <span key={`r-${i}`} className="flex items-center gap-0.5 font-mono" style={{ color: "rgb(230, 10, 10)" }}>
+              <Minus className="w-3 h-3" />
+              {token}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface AttributeRendererProps {
